@@ -1,0 +1,5 @@
+recursive-include src/promptshield/resources *.py *.yaml
+recursive-include src/promptshield/dashboard/templates *.html
+include LICENSE
+include README.md
+include pyproject.toml

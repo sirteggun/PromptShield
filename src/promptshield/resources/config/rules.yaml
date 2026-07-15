@@ -1,0 +1,26 @@
+# PromptShield rule configuration
+# --------------------------------
+# Keywords listed here are matched case-insensitively by KeywordDetector.
+# Add or remove entries without changing code.
+
+blocked_keywords:
+  - payroll
+  - acquisition
+  - customer_db
+
+# Weighted context keywords for ContextDetector (KeywordContextStrategy).
+# Format: keyword: weight  (default weight is 10 if omitted / list form)
+context_risk_keywords:
+  production: 20
+  payroll: 25
+  salaries: 10
+  internal: 15
+  confidential: 25
+  staging: 10
+  live: 15
+  customer data: 20
+  financial: 20
+  m&a: 25
+  soc2: 15
+  gdpr: 15
+  hipaa: 20

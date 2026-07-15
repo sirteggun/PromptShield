@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Analyses · PromptShield{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+  <h1 class="h3 mb-0">Analyses</h1>
+  <span class="footer-muted">{{ total }} total · page {{ page_num }}/{{ total_pages }}</span>
+</div>
+<div class="card p-3">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Risk</th>
+          <th>Policy</th>
+          <th>Findings</th>
+          <th>Classification</th>
+          <th>Request</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in items %}
+        <tr>
+          <td>
+            <a href="/dashboard/analyses/{{ r.id }}{% if dashboard_key %}?key={{ dashboard_key }}{% endif %}">
+              {{ r.timestamp[:19] }}
+            </a>
+          </td>
+          <td>
+            <span class="badge badge-{{ r.risk_level|lower }}">{{ r.risk_level }}</span>
+            {{ r.risk_score }}
+          </td>
+          <td>{{ r.policy_action }}</td>
+          <td>{{ r.finding_count }}</td>
+          <td>{{ r.classification_label }}</td>
+          <td class="footer-muted small">{{ r.request_id[:12] }}…</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="footer-muted">No analyses stored yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <nav>
+    {% set q = ('&key=' + dashboard_key) if dashboard_key else '' %}
+    {% if page_num > 1 %}
+      <a class="btn btn-sm btn-outline-secondary" href="/dashboard/analyses?page={{ page_num - 1 }}{{ q }}">Previous</a>
+    {% endif %}
+    {% if page_num < total_pages %}
+      <a class="btn btn-sm btn-outline-secondary" href="/dashboard/analyses?page={{ page_num + 1 }}{{ q }}">Next</a>
+    {% endif %}
+  </nav>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>setInterval(() => location.reload(), 30000);</script>
+{% endblock %}

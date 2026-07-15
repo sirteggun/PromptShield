@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Analysis detail · PromptShield{% endblock %}
+{% block content %}
+{% set q = ('?key=' + dashboard_key) if dashboard_key else '' %}
+<a class="footer-muted" href="/dashboard/analyses{{ q }}">← Back to list</a>
+<h1 class="h3 mt-2 mb-3">Analysis {{ analysis.id[:8] }}…</h1>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="card p-3"><div class="footer-muted">Risk</div>
+    <div><span class="badge badge-{{ analysis.risk_level|lower }}">{{ analysis.risk_level }}</span> {{ analysis.risk_score }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="footer-muted">Policy</div>
+    <div class="fs-5">{{ analysis.policy_action }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="footer-muted">Classification</div>
+    <div class="fs-5">{{ analysis.classification_label or '—' }}</div>
+  </div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="footer-muted">Prompt</div>
+    <div class="small">hash {{ analysis.prompt_hash[:16] }}… · len {{ analysis.prompt_length }}
+      · encrypted: {{ 'yes' if analysis.has_encrypted_prompt else 'no' }}</div>
+  </div></div>
+</div>
+
+<div class="card p-3">
+  <h2 class="h6">Findings (redacted)</h2>
+  {% for f in analysis.findings %}
+  <div class="border-bottom border-secondary py-3">
+    <div class="d-flex justify-content-between">
+      <strong>{{ f.detector_name }}</strong>
+      <span class="badge bg-secondary">{{ f.category }} · {{ f.severity }} · w{{ f.weight }}</span>
+    </div>
+    <div class="mt-1"><code>{{ f.matched_text_preview }}</code> → <code>{{ f.redacted_text }}</code></div>
+    {% if f.explanation %}<p class="small mt-2 mb-1">{{ f.explanation }}</p>{% endif %}
+    {% if f.remediation %}<p class="small footer-muted mb-0">{{ f.remediation }}</p>{% endif %}
+    {% if f.compliance_frameworks %}
+    <div class="mt-1">{% for fw in f.compliance_frameworks %}<span class="badge bg-dark border">{{ fw }}</span> {% endfor %}</div>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="footer-muted mb-0">No findings.</p>
+  {% endfor %}
+</div>
+{% endblock %}

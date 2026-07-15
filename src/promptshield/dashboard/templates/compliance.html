@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Compliance · PromptShield{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Compliance posture</h1>
+<p class="footer-muted mb-4">
+  Score = percentage of analyses <em>without</em> findings mapped to each framework.
+  Empty database → 100% for all frameworks. No original prompts are shown.
+</p>
+<div class="row g-4">
+  {% for name in ['GDPR', 'SOC2', 'PCI_DSS', 'ISO27001'] %}
+    {% set fw = compliance.get(name) %}
+    {% if not fw and name == 'PCI_DSS' %}{% set fw = compliance.get('PCI-DSS') %}{% endif %}
+    {% if fw %}
+    <div class="col-md-6">
+      <div class="card p-4">
+        <div class="d-flex justify-content-between mb-2">
+          <h2 class="h5 mb-0">{{ name.replace('_', '-') }}</h2>
+          <span class="fs-4 fw-bold">{{ fw.score }}%</span>
+        </div>
+        <div class="progress mb-2">
+          <div class="progress-bar {% if fw.score >= 85 %}bg-success{% elif fw.score >= 70 %}bg-warning{% else %}bg-danger{% endif %}"
+               role="progressbar" style="width: {{ fw.score }}%"
+               aria-valuenow="{{ fw.score }}" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <div class="footer-muted small">
+          Analyses with issues: {{ fw.analyses_with_issues }} / {{ fw.total_analyses }}
+          · Related findings: {{ fw.total_findings }}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script>setInterval(() => location.reload(), 30000);</script>
+{% endblock %}

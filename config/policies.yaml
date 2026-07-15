@@ -1,0 +1,78 @@
+# =============================================================================
+# PromptShield — Policy Engine configuration
+# =============================================================================
+#
+# Policies turn detection results into *decisions*: block, warn, or allow.
+# They run AFTER detectors and RiskScoringEngine. They do not change the
+# numeric risk score; they override the send decision.
+#
+# ---------------------------------------------------------------------------
+# Rule schema
+# ---------------------------------------------------------------------------
+# policies:           list of policy objects
+#
+# Each policy:
+#   id:            unique string identifier (required)
+#   description:   human-readable purpose
+#   action:        block | warn | allow   (default: warn)
+#   priority:      integer; higher wins when multiple policies match
+#                  tie-break: block > warn > allow
+#   message:       shown to the user / included in JSON when triggered
+#   conditions:    map of filters; ALL listed keys must match (AND)
+#
+# Conditions (all optional; AND across keys):
+#   category:      string or list — finding.category must match one
+#   context:       string or list — ContextDetector keyword(s) present
+#   keyword:       string or list — KeywordDetector blocked keyword(s)
+#   severity:      INFO | WARNING | CRITICAL  (minimum product severity)
+#                  Maps to internal Severity: INFO→info, WARNING→medium+,
+#                  CRITICAL→critical only as floor.
+#   min_weight:    int — sum of weights of findings matching the *finding*
+#                  filters (category/context/keyword/severity) must be >= N
+#   max_risk_score: int — policy triggers when overall risk_score > N
+#
+# Finding-level filters (category, context, keyword, severity) are evaluated
+# against the finding list. Score-level filters (max_risk_score) use the
+# pipeline score. min_weight sums weights of findings that pass the
+# finding-level filters present in the same rule.
+#
+# Example: PCI needs BOTH a pii finding AND a context "financial" finding.
+# =============================================================================
+
+policies:
+  # --- Hard block: any secret credential pattern ---
+  - id: NO_SECRETS
+    description: Blocca qualsiasi invio che contenga segreti (AWS, JWT, chiavi, token).
+    action: block
+    priority: 100
+    conditions:
+      category: secret
+    message: "Trovati segreti nel prompt. Rimuoverli prima di inviare."
+
+  # --- Soft warn: production context ---
+  - id: PRODUCTION_WARNING
+    description: Avvisa se il prompt menziona ambienti di produzione.
+    action: warn
+    priority: 50
+    conditions:
+      context: production
+    message: "Il prompt contiene riferimenti alla produzione. Verificare i dati."
+
+  # --- Compliance: PII + financial context ---
+  - id: PCI_COMPLIANCE
+    description: Blocca prompt con dati PII in contesto finanziario (PCI DSS).
+    action: block
+    priority: 90
+    conditions:
+      category: pii
+      context: financial
+    message: "Dati personali in contesto finanziario. Bloccato per policy PCI DSS."
+
+  # --- Internal blocked keywords (payroll, acquisition, …) ---
+  - id: INTERNAL_KEYWORDS
+    description: Avvisa quando compaiono parole chiave di policy interna.
+    action: warn
+    priority: 40
+    conditions:
+      category: keyword
+    message: "Rilevate parole chiave interne bloccate. Rivedere il contenuto del prompt."

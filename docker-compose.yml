@@ -1,0 +1,49 @@
+services:
+  promptshield:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      PROMPTSHIELD_ENV: development
+      # Optional in development; set for auth testing:
+      # PROMPTSHIELD_API_KEY: dev-key
+      PROMPTSHIELD_CORS_ORIGINS: "http://localhost:3000,http://localhost:5173"
+      # SQLite by default; switch to Postgres with profile `postgres`
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////app/data/promptshield.db}
+      PROMPTSHIELD_PERSISTENCE: "1"
+      PROMPTSHIELD_RETENTION_DAYS: "90"
+      # Optional 64-hex AES key for encrypted_prompt:
+      # PROMPTSHIELD_ENCRYPTION_KEY: "0123...cdef"
+    volumes:
+      - ./src:/app/src
+      - ./plugins:/app/plugins
+      - ./config:/app/config
+      - ps_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # Optional: docker compose --profile postgres up
+  postgres:
+    profiles: ["postgres"]
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: promptshield
+      POSTGRES_PASSWORD: promptshield
+      POSTGRES_DB: promptshield
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U promptshield"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  ps_data:
+  pg_data:

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Audit · PromptShield{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Audit timeline</h1>
+<div class="card p-3">
+  <ul class="list-group list-group-flush">
+    {% for e in events %}
+    <li class="list-group-item bg-transparent text-light border-secondary">
+      <div class="d-flex justify-content-between">
+        <span class="event-type text-info">{{ e.event_type }}</span>
+        <span class="footer-muted">{{ e.timestamp[:19] }}</span>
+      </div>
+      {% if e.analysis_id %}
+      <div class="small footer-muted">analysis: {{ e.analysis_id }}</div>
+      {% endif %}
+      {% if e.metadata %}
+      <pre class="small mb-0 mt-1 footer-muted">{{ e.metadata }}</pre>
+      {% endif %}
+    </li>
+    {% else %}
+    <li class="list-group-item bg-transparent footer-muted border-0">No events yet.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>setInterval(() => location.reload(), 30000);</script>
+{% endblock %}

@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block title %}Overview · PromptShield{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Security Overview</h1>
+  <span class="footer-muted" id="last-updated">Updated just now</span>
+</div>
+
+<div class="row g-3 mb-4" id="stat-cards">
+  <div class="col-md-3">
+    <div class="card card-stat p-3">
+      <div class="footer-muted">Analyses today</div>
+      <div class="display-6" id="stat-total">{{ summary.today.total_analyses }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-stat p-3">
+      <div class="footer-muted">Blocked</div>
+      <div class="display-6 text-danger" id="stat-blocked">{{ summary.today.blocked }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-stat p-3">
+      <div class="footer-muted">Secrets detected</div>
+      <div class="display-6 text-warning" id="stat-secrets">{{ summary.today.secrets_detected }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card card-stat p-3">
+      <div class="footer-muted">Avg risk score</div>
+      <div class="display-6" id="stat-avg">{{ summary.today.average_risk_score }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-4">
+    <div class="card p-3">
+      <h2 class="h6">Risk distribution (30d)</h2>
+      <canvas id="riskPie" height="200"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card p-3">
+      <h2 class="h6">Top detectors (30d)</h2>
+      <canvas id="detectorsBar" height="200"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card p-3">
+      <div class="d-flex justify-content-between">
+        <h2 class="h6 mb-0">Trend</h2>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-secondary" data-days="7">7d</button>
+          <button class="btn btn-outline-secondary active" data-days="30">30d</button>
+          <button class="btn btn-outline-secondary" data-days="90">90d</button>
+        </div>
+      </div>
+      <canvas id="trendLine" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h2 class="h6">Recent analyses</h2>
+      <div class="table-responsive">
+        <table class="table table-sm align-middle" id="recent-table">
+          <thead><tr>
+            <th>Time</th><th>Risk</th><th>Policy</th><th>Findings</th><th>Class</th>
+          </tr></thead>
+          <tbody>
+          {% for r in recent %}
+            <tr>
+              <td><a href="/dashboard/analyses/{{ r.id }}{% if dashboard_key %}?key={{ dashboard_key }}{% endif %}">{{ r.timestamp[:19] }}</a></td>
+              <td><span class="badge badge-{{ r.risk_level|lower }}">{{ r.risk_level }}</span> {{ r.risk_score }}</td>
+              <td>{{ r.policy_action }}</td>
+              <td>{{ r.finding_count }}</td>
+              <td>{{ r.classification_label or '—' }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="footer-muted">No analyses yet. Run the API against some prompts.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card p-3">
+      <h2 class="h6">Audit timeline</h2>
+      <ul class="list-group list-group-flush" id="audit-list">
+        {% for e in events %}
+        <li class="list-group-item bg-transparent text-light border-secondary px-0">
+          <div class="d-flex justify-content-between">
+            <span class="event-type">{{ e.event_type }}</span>
+            <span class="footer-muted">{{ e.timestamp[:19] }}</span>
+          </div>
+        </li>
+        {% else %}
+        <li class="list-group-item bg-transparent footer-muted border-0 px-0">No audit events yet.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const riskData = {{ summary.risk_distribution|tojson }};
+const detectors = {{ summary.top_detectors|tojson }};
+const trendInit = {{ trend|tojson }};
+
+const pie = new Chart(document.getElementById('riskPie'), {
+  type: 'doughnut',
+  data: {
+    labels: Object.keys(riskData),
+    datasets: [{
+      data: Object.values(riskData),
+      backgroundColor: ['#22c55e', '#eab308', '#ef4444']
+    }]
+  },
+  options: { plugins: { legend: { labels: { color: '#e7ecf3' } } } }
+});
+
+const bar = new Chart(document.getElementById('detectorsBar'), {
+  type: 'bar',
+  data: {
+    labels: detectors.map(d => d.name),
+    datasets: [{ label: 'Findings', data: detectors.map(d => d.count), backgroundColor: '#3b82f6' }]
+  },
+  options: {
+    indexAxis: 'y',
+    scales: {
+      x: { ticks: { color: '#8b9bb4' }, grid: { color: '#243044' } },
+      y: { ticks: { color: '#e7ecf3' }, grid: { display: false } }
+    },
+    plugins: { legend: { display: false } }
+  }
+});
+
+const line = new Chart(document.getElementById('trendLine'), {
+  type: 'line',
+  data: {
+    labels: trendInit.labels,
+    datasets: [
+      { label: 'Total', data: trendInit.total, borderColor: '#3b82f6', tension: .3 },
+      { label: 'Blocked', data: trendInit.blocked, borderColor: '#ef4444', tension: .3 },
+      { label: 'Secrets', data: trendInit.secrets, borderColor: '#eab308', tension: .3 }
+    ]
+  },
+  options: {
+    scales: {
+      x: { ticks: { color: '#8b9bb4', maxTicksLimit: 8 }, grid: { color: '#243044' } },
+      y: { ticks: { color: '#8b9bb4' }, grid: { color: '#243044' } }
+    },
+    plugins: { legend: { labels: { color: '#e7ecf3' } } }
+  }
+});
+
+document.querySelectorAll('[data-days]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('[data-days]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const days = btn.dataset.days;
+    const res = await fetch(psUrl('/api/v1/dashboard/trend?days=' + days), { headers: psHeaders() });
+    if (!res.ok) return;
+    const t = await res.json();
+    line.data.labels = t.labels;
+    line.data.datasets[0].data = t.total;
+    line.data.datasets[1].data = t.blocked;
+    line.data.datasets[2].data = t.secrets;
+    line.update();
+  });
+});
+
+async function refreshDashboard() {
+  try {
+    const [sumRes, recRes, audRes] = await Promise.all([
+      fetch(psUrl('/api/v1/dashboard/summary'), { headers: psHeaders() }),
+      fetch(psUrl('/api/v1/dashboard/recent?limit=10'), { headers: psHeaders() }),
+      fetch(psUrl('/api/v1/dashboard/audit-timeline?limit=15'), { headers: psHeaders() }),
+    ]);
+    if (sumRes.ok) {
+      const s = await sumRes.json();
+      document.getElementById('stat-total').textContent = s.today.total_analyses;
+      document.getElementById('stat-blocked').textContent = s.today.blocked;
+      document.getElementById('stat-secrets').textContent = s.today.secrets_detected;
+      document.getElementById('stat-avg').textContent = s.today.average_risk_score;
+      pie.data.labels = Object.keys(s.risk_distribution);
+      pie.data.datasets[0].data = Object.values(s.risk_distribution);
+      pie.update();
+      bar.data.labels = s.top_detectors.map(d => d.name);
+      bar.data.datasets[0].data = s.top_detectors.map(d => d.count);
+      bar.update();
+    }
+    document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+  } catch (e) { /* ignore network blips */ }
+}
+setInterval(refreshDashboard, 30000);
+</script>
+{% endblock %}
