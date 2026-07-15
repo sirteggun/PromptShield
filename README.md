@@ -63,7 +63,7 @@ Every day, developers accidentally paste API keys, customer data, and internal U
 
 ```bash
 pip install -e ".[dev]"   # from source
-# or: pip install promptshield  (when published)
+# or: pip install promptshield-ai  (when published)
 
 echo "My AWS key is AKIA1234567890ABCDEF" | promptshield --json -y
 # → policy_decision.action: block, exit code 2
