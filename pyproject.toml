@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "promptshield-ai"
+name = "promptshield-security"
 version = "0.6.0"
 description = "Firewall for prompts sent to Large Language Models — modular detector pipeline, policy engine, and Enterprise API."
 readme = "README.md"
