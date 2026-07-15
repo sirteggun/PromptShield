@@ -7,9 +7,43 @@ Before: Developer → LLM → 💥 secret leaked
 After:  Developer → PromptShield → ✅ Safe AI usage
 ```
 
+[![CI](https://github.com/sirteggun/PromptShield/actions/workflows/ci.yml/badge.svg)](https://github.com/sirteggun/PromptShield/actions/workflows/ci.yml)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](https://github.com/sirteggun/PromptShield/blob/main/LICENSE)
+[![Tests](https://img.shields.io/badge/tests-147%20passing-brightgreen.svg)](https://github.com/sirteggun/PromptShield/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-0.6.0-blue)]()
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue)]()
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue)]()
+
+## The problem
+
+AI assistants are becoming part of every engineering workflow.
+
+But developers are accidentally sending:
+
+- AWS credentials
+- customer emails
+- internal URLs
+- proprietary code
+- production incidents
+
+to external LLM providers.
+
+PromptShield acts as a security gateway before your prompt reaches an AI model.
+
+```text
+Developer
+    |
+    v
+PromptShield
+    |
+    +--> Block secrets
+    +--> Redact PII
+    +--> Audit usage
+    |
+    v
+ChatGPT / Claude / Copilot
+```
 
 ## Why PromptShield?
 
@@ -17,7 +51,7 @@ Every day, developers accidentally paste API keys, customer data, and internal U
 
 ## Features
 
-- 🔍 **8+ detectors** — AWS keys, JWT, GitHub tokens, private keys, email, private IPs, internal URLs, context keywords
+- 🔍 **9 security detectors** — AWS keys, JWT, GitHub tokens, private keys, email, private IPs, internal URLs, context keywords
 - 🛡️ **Policy engine (YAML)** — `block` / `warn` / `allow` with priorities
 - 🧹 **Smart sanitization** — replacement tokens, overlap-aware
 - 🧠 **Prompt intelligence** — content classification + natural-language risk explanation

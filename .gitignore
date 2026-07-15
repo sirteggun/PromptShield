@@ -37,3 +37,8 @@ Thumbs.db
 # Local secrets / overrides
 .env
 *.local.yaml
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
