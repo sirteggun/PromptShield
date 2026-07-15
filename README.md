@@ -1,4 +1,7 @@
 # PromptShield – Open-Source AI Firewall
+[![PyPI](https://img.shields.io/pypi/v/promptshield-security.svg)](https://pypi.org/project/promptshield-security/)
+[![Python](https://img.shields.io/pypi/pyversions/promptshield-security.svg)](https://pypi.org/project/promptshield-security/)
+[![License](https://img.shields.io/github/license/sirteggun/PromptShield.svg)](LICENSE)
 
 **Stop accidental leaks of secrets, PII, and proprietary code to ChatGPT, Claude, Copilot, and other LLMs.**
 
