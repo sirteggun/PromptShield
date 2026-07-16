@@ -1,12 +1,12 @@
 # Contributing to PromptShield
 
-Thanks for helping build an open-source AI prompt firewall.
+Thanks for helping build PromptShield, an open-source security gateway for safe AI usage.
 
 ## Development setup
 
 ```bash
 git clone https://github.com/sirteggun/PromptShield.git
-cd promptshield
+cd PromptShield
 python -m venv .venv
 # Windows: .venv\Scripts\activate
 # Unix: source .venv/bin/activate
@@ -19,7 +19,7 @@ pip install -e ".[dev]"
 pytest -q
 ```
 
-Use an in-memory SQLite URL in tests (`DATABASE_URL=sqlite:///:memory:`). Do not commit secrets.
+Tests use in-memory SQLite by default (`DATABASE_URL=sqlite:///:memory:` when configured). You do not need an external database for the standard suite. Do not commit secrets.
 
 ## Project layout
 
@@ -39,7 +39,13 @@ Use an in-memory SQLite URL in tests (`DATABASE_URL=sqlite:///:memory:`). Do not
 - Prefer incremental changes; add tests with every feature.
 - Never log or persist full secrets in plaintext.
 - Use Google-style docstrings on public modules.
-- Format and type-check when practical (`mypy` optional in CI).
+- Before opening a PR, run:
+
+```bash
+ruff check .
+ruff format --check .
+mypy src --strict --ignore-missing-imports
+```
 
 ## Pull requests
 
@@ -50,7 +56,9 @@ Use an in-memory SQLite URL in tests (`DATABASE_URL=sqlite:///:memory:`). Do not
 
 ## Reporting security issues
 
-Do not open public issues for vulnerabilities that could leak secrets. Prefer a private security advisory or email maintainers.
+Do not open public issues for security vulnerabilities (including issues that could lead to secret leaks).
+
+Report privately via [GitHub Security Advisories](https://docs.github.com/en/code-security/security-advisories) on this repository so maintainers can assess and fix the issue before disclosure.
 
 ## Code of conduct
 
