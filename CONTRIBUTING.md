@@ -5,7 +5,7 @@ Thanks for helping build an open-source AI prompt firewall.
 ## Development setup
 
 ```bash
-git clone <[repo-url](https://github.com/sirteggun/PromptShield.git)>
+git clone <https://github.com/sirteggun/PromptShield.git>
 cd promptshield
 python -m venv .venv
 # Windows: .venv\Scripts\activate
