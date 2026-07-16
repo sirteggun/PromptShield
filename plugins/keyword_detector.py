@@ -79,23 +79,22 @@ class KeywordDetector(BaseDetector):
                         end_position=match.end(),
                         severity=Severity.MEDIUM,
                         message=(
-                            f"Parola chiave bloccata rilevata: '{original}'. "
-                            "Il termine è elencato in rules.yaml."
+                            f"Blocked keyword detected: '{original}'. "
+                            "The term is listed in rules.yaml."
                         ),
                         weight=self.DEFAULT_WEIGHT,
                         category=self.CATEGORY,
                         explanation=(
-                            f"Il termine '{original}' è classificato come parola "
-                            "chiave di policy bloccata. Può indicare argomenti "
-                            "sensibili (dati HR, M&A, database clienti) che non "
-                            "dovrebbero essere discussi con LLM esterni senza "
-                            "autorizzazione."
+                            f"The term '{original}' is classified as a blocked "
+                            "policy keyword. It may indicate sensitive topics "
+                            "(HR data, M&A, customer databases) that should not "
+                            "be discussed with external LLMs without authorization."
                         ),
                         remediation=(
-                            "Rimuovi o generalizza i riferimenti a dati interni "
-                            "prima di inviare il prompt. Usa descrizioni anonime "
-                            "o placeholder al posto di nomi di sistemi e processi "
-                            "riservati."
+                            "Remove or generalize references to internal data "
+                            "before sending the prompt. Use anonymized descriptions "
+                            "or placeholders instead of reserved system and process "
+                            "names."
                         ),
                         replacement_token=self.REPLACEMENT_TOKEN,
                         metadata={"keyword": original},

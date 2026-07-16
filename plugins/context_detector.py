@@ -103,21 +103,21 @@ class KeywordContextStrategy(ContextDetectionStrategy):
                         end_position=match.end(),
                         severity=Severity.MEDIUM,  # product WARNING
                         message=(
-                            f"Parola di contesto a rischio: '{keyword}' "
-                            f"(peso {weight})."
+                            f"Risky context keyword: '{keyword}' "
+                            f"(weight {weight})."
                         ),
                         weight=weight,
                         category=self.CATEGORY,
                         explanation=(
-                            f"Il termine '{keyword}' suggerisce un contesto "
-                            "operativo o di compliance sensibile. Combinato con "
-                            "altri dati nel prompt può rivelare processi interni, "
-                            "dati HR/finanziari o obblighi normativi che non "
-                            "dovrebbero essere esposti a LLM esterni."
+                            f"The term '{keyword}' suggests a sensitive operational "
+                            "or compliance context. Combined with other data in the "
+                            "prompt it may reveal internal processes, HR/financial "
+                            "data, or regulatory obligations that should not be "
+                            "exposed to external LLMs."
                         ),
                         remediation=(
-                            "Valuta se il prompt contiene dettagli operativi "
-                            "che non dovrebbero essere condivisi esternamente."
+                            "Assess whether the prompt contains operational details "
+                            "that should not be shared externally."
                         ),
                         replacement_token=self.REPLACEMENT_TOKEN,
                         metadata={

@@ -92,22 +92,22 @@ class SourceCodeStrategy(ClassificationStrategy):
 
         if self._CODE_CORE.search(prompt):
             score += 0.3
-            evidence.append("keyword codice (import/def/class/function/var/let/const)")
+            evidence.append("code keywords (import/def/class/function/var/let/const)")
         if self._COMMENT.search(prompt):
             score += 0.2
-            evidence.append("commenti (//, #, /*)")
+            evidence.append("comments (//, #, /*)")
         opens = prompt.count("{")
         closes = prompt.count("}")
         if opens > 0 and opens == closes:
             score += 0.2
-            evidence.append("parentesi graffe bilanciate")
+            evidence.append("balanced curly braces")
         indented = sum(1 for line in _lines(prompt) if re.match(r"^[ \t]+\S", line))
         if indented >= 3:
             score += 0.2
-            evidence.append("indentazione multi-riga (≥3 righe)")
+            evidence.append("multi-line indentation (>=3 lines)")
         if self._LANG_KW.search(prompt):
             score += 0.1
-            evidence.append("keyword di linguaggio comuni")
+            evidence.append("common language keywords")
 
         score = _saturate(score)
         if score <= 0.0:
@@ -150,31 +150,31 @@ class ConfigFileStrategy(ClassificationStrategy):
         if len(assigns) >= 2:
             # 0.35 so two KEY=value lines clear the >0.3 report threshold
             score += 0.35
-            evidence.append("assegnazioni chiave=valore / chiave: valore")
+            evidence.append("key=value / key: value assignments")
         elif len(assigns) == 1:
             score += 0.2
-            evidence.append("assegnazione chiave=valore")
+            evidence.append("key=value assignment")
 
         if re.search(r"(?m)^\s*#\s*\S+", prompt):
             score += 0.1
-            evidence.append("commenti stile config (#)")
+            evidence.append("config-style comments (#)")
 
         if self._SECTION.search(prompt):
             score += 0.2
-            evidence.append("sezioni [nome] (INI/TOML)")
+            evidence.append("[name] sections (INI/TOML)")
 
         yaml_keys = self._YAML_KEY.findall(prompt)
         if len(yaml_keys) >= 2:
             score += 0.2
-            evidence.append("struttura YAML (chiavi:)")
+            evidence.append("YAML structure (keys:)")
 
         if self._JSON_KEY.search(prompt) and ("{" in prompt or "[" in prompt):
             score += 0.2
-            evidence.append("JSON con chiavi quotate")
+            evidence.append("JSON with quoted keys")
 
         if self._MARKERS.search(prompt):
             score += 0.1
-            evidence.append("marker di file di configurazione")
+            evidence.append("configuration file markers")
 
         score = _saturate(score)
         if score <= 0.0:
@@ -217,18 +217,18 @@ class LogOutputStrategy(ClassificationStrategy):
 
         if self._TS.search(prompt):
             score += 0.3
-            evidence.append("timestamp di log")
+            evidence.append("log timestamps")
         levels = self._LEVEL.findall(prompt)
         if levels:
             score += 0.3
-            evidence.append("livelli di log (INFO/DEBUG/ERROR/…)")
+            evidence.append("log levels (INFO/DEBUG/ERROR/...)")
         if self._STACK.search(prompt):
             score += 0.2
-            evidence.append("stack trace / eccezione")
+            evidence.append("stack trace / exception")
         level_lines = sum(1 for line in _lines(prompt) if self._LEVEL.search(line))
         if level_lines >= 2:
             score += 0.2
-            evidence.append("più righe con livello di log")
+            evidence.append("multiple lines with log levels")
 
         score = _saturate(score)
         if score <= 0.0:
@@ -270,10 +270,10 @@ class DatabaseDumpStrategy(ClassificationStrategy):
 
         if self._SQL.search(prompt):
             score += 0.3
-            evidence.append("statement SQL (INSERT/SELECT/CREATE…)")
+            evidence.append("SQL statements (INSERT/SELECT/CREATE...)")
         if self._PIPE.search(prompt):
             score += 0.2
-            evidence.append("colonne separate da |")
+            evidence.append("pipe-separated columns")
         csv_lines = [
             line
             for line in _lines(prompt)
@@ -281,17 +281,17 @@ class DatabaseDumpStrategy(ClassificationStrategy):
         ]
         if len(csv_lines) >= 2:
             score += 0.2
-            evidence.append("righe CSV ripetitive")
+            evidence.append("repetitive CSV rows")
         lengths = [len(line) for line in _lines(prompt) if line.strip()]
         if len(lengths) >= 4:
             avg = sum(lengths) / len(lengths)
             similar = sum(1 for n in lengths if abs(n - avg) <= max(5, avg * 0.2))
             if similar >= 4:
                 score += 0.2
-                evidence.append("righe di lunghezza simile (dump tabellare)")
+                evidence.append("similar-length lines (tabular dump)")
         if self._VALUES.search(prompt) or self._SQL_TYPE.search(prompt):
             score += 0.1
-            evidence.append("pattern SQL VALUES / tipi di colonna")
+            evidence.append("SQL VALUES pattern / column types")
 
         score = _saturate(score)
         if score <= 0.0:
@@ -335,20 +335,20 @@ class EmailConversationStrategy(ClassificationStrategy):
         headers = self._HEADERS.findall(prompt)
         if headers:
             score += 0.3
-            evidence.append("header email (From/To/Subject)")
+            evidence.append("email headers (From/To/Subject)")
         if self._EXTRA.search(prompt):
             score += 0.2
-            evidence.append("header aggiuntivi (Cc/Date/…)")
+            evidence.append("additional headers (Cc/Date/...)")
         quote_lines = len(self._QUOTE.findall(prompt))
         if quote_lines >= 2:
             score += 0.2
-            evidence.append("quoting con >")
+            evidence.append("quoting with >")
         if self._THREAD.search(prompt):
             score += 0.2
-            evidence.append("thread / messaggio originale")
+            evidence.append("thread / original message")
         if self._EMAIL.search(prompt):
             score += 0.1
-            evidence.append("indirizzo email presente")
+            evidence.append("email address present")
 
         score = _saturate(score)
         if score <= 0.0:
@@ -390,21 +390,21 @@ class GenericDocumentStrategy(ClassificationStrategy):
         ends = len(re.findall(r"[.!?]", text))
         if ends >= 2 or len(sentences) >= 1:
             score += 0.3
-            evidence.append("frasi complete con punteggiatura")
+            evidence.append("complete sentences with punctuation")
 
         if len(self._ARTICLE.findall(text)) >= 3:
             score += 0.2
-            evidence.append("articoli / connettivi di prosa")
+            evidence.append("prose articles / connectives")
 
         tech = sum(text.count(c) for c in "{}[];=")
         words = max(1, len(text.split()))
         if tech / words < 0.05:
             score += 0.2
-            evidence.append("bassa densità di token tecnici")
+            evidence.append("low density of technical tokens")
 
         if len(text) >= 120 and "\n\n" in text:
             score += 0.1
-            evidence.append("paragrafi lunghi")
+            evidence.append("long paragraphs")
 
         score = _saturate(score)
         # Soft fallback: only report if some prose signal exists
@@ -481,7 +481,7 @@ class PromptClassifier:
                 PromptLabel(
                     label="unknown",
                     confidence=1.0,
-                    evidence=["Errore interno di classificazione"],
+                    evidence=["Internal classification error"],
                 )
             ]
 
@@ -491,7 +491,7 @@ class PromptClassifier:
                 PromptLabel(
                     label="unknown",
                     confidence=1.0,
-                    evidence=["Nessun pattern riconosciuto"],
+                    evidence=["No recognized pattern"],
                 )
             ]
         return labels

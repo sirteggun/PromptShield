@@ -321,32 +321,32 @@ def dashboard_report(*, tenant_id: str = "default") -> dict[str, Any]:
         count = item["count"]
         if cat == "secret":
             recommendations.append(
-                f"Aumento di finding secret ({count} negli ultimi 30g): "
-                "verificare formazione sviluppatori e secret scanning in CI."
+                f"Increase in secret findings ({count} in the last 30 days): "
+                "review developer training and secret scanning in CI."
             )
         elif cat == "pii":
             recommendations.append(
-                f"PII rilevata frequentemente ({count}): rivedere policy di "
-                "minimizzazione dati e mascheramento prima di invii a LLM."
+                f"PII detected frequently ({count}): review data-minimization "
+                "and masking policies before sending prompts to LLMs."
             )
         elif cat == "context":
             recommendations.append(
-                f"Contesto sensibile ({count}): limitare menzioni di production/"
-                "financial nei prompt verso provider esterni."
+                f"Sensitive context ({count}): limit production/financial "
+                "mentions in prompts to external providers."
             )
         else:
             recommendations.append(
-                f"Categoria '{cat}' tra i top rischi ({count} finding): "
-                "valutare policy di blocco dedicate."
+                f"Category '{cat}' among top risks ({count} findings): "
+                "consider dedicated block policies."
             )
     if summary["today"]["blocked"] > 0:
         recommendations.append(
-            f"Oggi {summary['today']['blocked']} prompt bloccati da policy — "
-            "monitorare false positive e aggiornare rules.yaml se necessario."
+            f"Today {summary['today']['blocked']} prompts blocked by policy — "
+            "monitor false positives and update rules.yaml if needed."
         )
     if not recommendations:
         recommendations.append(
-            "Nessun rischio dominante nel periodo: mantenere monitoraggio continuo."
+            "No dominant risk in the period: keep continuous monitoring."
         )
 
     return {

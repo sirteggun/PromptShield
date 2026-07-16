@@ -35,7 +35,7 @@ def test_match_keyword_with_specific_weight() -> None:
         or "context" in f.explanation.lower()
         or f.explanation
     )
-    assert "condivisi esternamente" in f.remediation
+    assert "shared externally" in f.remediation
 
 
 def test_no_match() -> None:

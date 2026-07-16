@@ -49,9 +49,9 @@ _BAND_COLORS: dict[RiskBand, str] = {
 }
 
 _BAND_LABELS: dict[RiskBand, str] = {
-    RiskBand.GREEN: "VERDE (basso rischio)",
-    RiskBand.YELLOW: "GIALLO (rischio medio)",
-    RiskBand.RED: "ROSSO (alto rischio)",
+    RiskBand.GREEN: "GREEN (low risk)",
+    RiskBand.YELLOW: "YELLOW (medium risk)",
+    RiskBand.RED: "RED (high risk)",
 }
 
 _BAND_JSON: dict[RiskBand, str] = {
@@ -143,7 +143,7 @@ def _read_prompt_from_stdin() -> str:
         return sys.stdin.read()
 
     print(
-        "Inserisci il prompt (termina con CTRL+D / CTRL+Z oppure una riga con solo '.'):",
+        "Enter the prompt (end with CTRL+D / CTRL+Z or a line containing only '.'):",
         file=sys.stderr,
     )
     lines: list[str] = []
@@ -194,18 +194,18 @@ def _print_finding(finding: Finding, index: int) -> None:
 def _print_policy_decision(decision: PolicyDecision) -> None:
     print(f"{Style.BRIGHT}=== Policy Decision ==={Style.RESET_ALL}")
     color = _ACTION_COLORS.get(decision.action, Fore.WHITE)
-    print(f"  Azione: {color}{decision.action.value.upper()}{Style.RESET_ALL}")
+    print(f"  Action: {color}{decision.action.value.upper()}{Style.RESET_ALL}")
     if decision.winning_policy is not None:
         print(
-            f"  Policy vincente: {decision.winning_policy.id} "
+            f"  Winning policy: {decision.winning_policy.id} "
             f"(priority={decision.winning_policy.priority})"
         )
     if decision.triggered_policies:
-        print("  Policy attivate:")
+        print("  Triggered policies:")
         for policy in decision.triggered_policies:
             print(f"    - [{policy.action.value}] {policy.id}: {policy.message}")
     else:
-        print("  Nessuna policy attivata.")
+        print("  No policies triggered.")
     print()
 
 
@@ -214,21 +214,21 @@ def _print_intelligence(
     explanation: RiskExplanation,
 ) -> None:
     print(f"{Style.BRIGHT}=== Prompt Intelligence ==={Style.RESET_ALL}")
-    print("Classificazione:")
+    print("Classification:")
     for lab in labels:
         print(f"  - {lab.label} (confidence={lab.confidence:.2f})")
         for ev in lab.evidence:
             print(f"      · {ev}")
     print()
-    print(f"{Style.BRIGHT}Spiegazione rischio:{Style.RESET_ALL}")
+    print(f"{Style.BRIGHT}Risk explanation:{Style.RESET_ALL}")
     print(f"  {explanation.summary}")
     if explanation.risk_factors:
-        print("  Fattori di rischio:")
+        print("  Risk factors:")
         for factor in explanation.risk_factors:
             print(f"    • {factor}")
     print(
-        f"  Sicuro dopo sanitizzazione: "
-        f"{'sì' if explanation.safe_after_sanitization else 'no'}"
+        f"  Safe after sanitization: "
+        f"{'yes' if explanation.safe_after_sanitization else 'no'}"
     )
     action_color = {
         "BLOCK": Fore.RED,
@@ -237,7 +237,7 @@ def _print_intelligence(
         "ALLOW": Fore.GREEN,
     }.get(explanation.recommended_action, Fore.WHITE)
     print(
-        f"  Azione consigliata: "
+        f"  Recommended action: "
         f"{action_color}{explanation.recommended_action}{Style.RESET_ALL}"
     )
     print()
@@ -252,7 +252,7 @@ def _print_result(
     print(f"{Style.BRIGHT}=== PromptShield Analysis ==={Style.RESET_ALL}")
     print(f"Findings: {len(result.findings)}")
     if not result.findings:
-        print(f"  {Fore.GREEN}Nessun finding rilevato.{Style.RESET_ALL}")
+        print(f"  {Fore.GREEN}No findings detected.{Style.RESET_ALL}")
     else:
         for i, finding in enumerate(result.findings, start=1):
             _print_finding(finding, i)
@@ -272,21 +272,21 @@ def _print_result(
 
 
 def _print_sanitization(result: SanitizationResult) -> None:
-    print(f"{Style.BRIGHT}=== Sanitizzazione ==={Style.RESET_ALL}")
+    print(f"{Style.BRIGHT}=== Sanitization ==={Style.RESET_ALL}")
     print(
-        f"Sostituzioni: {result.replacements}  |  "
-        f"Finding saltati (overlap/altro): {result.skipped}"
+        f"Replacements: {result.replacements}  |  "
+        f"Findings skipped (overlap/other): {result.skipped}"
     )
     if result.replaced_findings:
-        print(f"{Style.BRIGHT}Sostituzioni effettuate:{Style.RESET_ALL}")
+        print(f"{Style.BRIGHT}Replacements applied:{Style.RESET_ALL}")
         for finding in result.replaced_findings:
             token = finding.replacement_token
             label = label_for_token(token, finding)
             print(f"  {label:<22} -> {token}")
     else:
-        print("  (nessuna sostituzione)")
+        print("  (no replacements)")
     print()
-    print(f"{Style.BRIGHT}Prompt sanitizzato:{Style.RESET_ALL}")
+    print(f"{Style.BRIGHT}Sanitized prompt:{Style.RESET_ALL}")
     print(result.sanitized_prompt)
     print()
 
@@ -323,21 +323,21 @@ def _ask_yes(prompt_text: str, *, yes_values: set[str]) -> bool:
 
 def _ask_send_original() -> bool:
     return _ask_yes(
-        "Procedere con l'invio? (y/N) ",
+        "Proceed with send? (y/N) ",
         yes_values={"y", "yes", "s", "si", "sì"},
     )
 
 
 def _ask_send_sanitized() -> bool:
     return _ask_yes(
-        "Inviare il prompt sanitizzato? (y/N) ",
+        "Send the sanitized prompt? (y/N) ",
         yes_values={"y", "yes", "s", "si", "sì"},
     )
 
 
 def _ask_offer_sanitize() -> bool:
     return _ask_yes(
-        "Vuoi sanificare il prompt prima di inviarlo? (s/N) ",
+        "Sanitize the prompt before sending? (y/N) ",
         yes_values={"s", "si", "sì", "y", "yes"},
     )
 
@@ -347,8 +347,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="promptshield",
         description=(
-            "Firewall per prompt inviati a LLM: detector modulari, risk score, "
-            "policy engine YAML, sanitizzazione e report JSON per CI/CD."
+            "Firewall for prompts sent to LLMs: modular detectors, risk score, "
+            "YAML policy engine, sanitization, and JSON reports for CI/CD."
         ),
     )
     parser.add_argument(
@@ -356,51 +356,51 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--file",
         type=Path,
         default=None,
-        help="Leggi il prompt da un file invece che da stdin.",
+        help="Read the prompt from a file instead of stdin.",
     )
     parser.add_argument(
         "-r",
         "--rules",
         type=Path,
         default=None,
-        help="Percorso a rules.yaml (default: config/rules.yaml).",
+        help="Path to rules.yaml (default: config/rules.yaml).",
     )
     parser.add_argument(
         "--policy-file",
         type=Path,
         default=None,
-        help="Percorso a policies.yaml (default: config/policies.yaml).",
+        help="Path to policies.yaml (default: config/policies.yaml).",
     )
     parser.add_argument(
         "-p",
         "--plugins-dir",
         type=Path,
         default=None,
-        help="Directory dei plugin detector (default: ./plugins).",
+        help="Detector plugins directory (default: ./plugins).",
     )
     parser.add_argument(
         "-s",
         "--sanitize",
         action="store_true",
         help=(
-            "Dopo l'analisi, oscura i finding con i replacement_token "
-            "e proponi l'invio del prompt sanitizzato."
+            "After analysis, redact findings with replacement_token values "
+            "and offer to send the sanitized prompt."
         ),
     )
     parser.add_argument(
         "--json",
         action="store_true",
         help=(
-            "Emette un report JSON strutturato su stdout (metadati, findings "
-            "redatti, breakdown, policy_decision, exit code)."
+            "Emit a structured JSON report on stdout (metadata, redacted "
+            "findings, breakdown, policy_decision, exit code)."
         ),
     )
     parser.add_argument(
         "--explain",
         action="store_true",
         help=(
-            "Classifica il tipo di contenuto del prompt e spiega il rischio "
-            "in linguaggio naturale (sezione intelligence nel JSON)."
+            "Classify prompt content type and explain risk in natural language "
+            "(intelligence section in JSON)."
         ),
     )
     parser.add_argument(
@@ -408,20 +408,20 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--yes",
         action="store_true",
         help=(
-            "Non chiedere conferma; simula l'invio se le policy lo consentono. "
-            "Una policy block impedisce l'invio anche con -y."
+            "Do not prompt for confirmation; simulate send when policies allow. "
+            "A block policy still prevents send even with -y."
         ),
     )
     parser.add_argument(
         "--no-color",
         action="store_true",
-        help="Disabilita i colori ANSI.",
+        help="Disable ANSI colors.",
     )
     parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
-        help="Abilita logging di debug su stderr.",
+        help="Enable debug logging on stderr.",
     )
     parser.add_argument(
         "--version",
@@ -436,7 +436,7 @@ def _refuse_blocked(
 ) -> int:
     """Print block message and return appropriate exit code."""
     print(
-        f"{Fore.RED}INVIO BLOCCATO da policy"
+        f"{Fore.RED}SEND BLOCKED by policy"
         f"{Style.RESET_ALL}"
         + (f" ({decision.winning_policy.id})" if decision.winning_policy else "")
     )
@@ -451,7 +451,7 @@ def run_serve(argv: list[str] | None = None) -> int:
     """Start the Enterprise API (uvicorn)."""
     parser = argparse.ArgumentParser(
         prog="promptshield serve",
-        description="Avvia PromptShield Enterprise API (FastAPI/uvicorn).",
+        description="Start PromptShield Enterprise API (FastAPI/uvicorn).",
     )
     parser.add_argument("--host", default="0.0.0.0", help="Bind host (default 0.0.0.0)")
     parser.add_argument(
@@ -460,15 +460,15 @@ def run_serve(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--reload",
         action="store_true",
-        help="Abilita auto-reload (solo sviluppo).",
+        help="Enable auto-reload (development only).",
     )
     args = parser.parse_args(argv)
     try:
         import uvicorn
     except ImportError:
         print(
-            "uvicorn non installato. Esegui: pip install 'promptshield[api]' "
-            "oppure pip install uvicorn fastapi",
+            "uvicorn is not installed. Run: pip install 'promptshield-security[api]' "
+            "or pip install uvicorn fastapi",
             file=sys.stderr,
         )
         return 1
@@ -485,7 +485,7 @@ def run_dashboard(argv: list[str] | None = None) -> int:
     """Start the API server and print the dashboard URL."""
     parser = argparse.ArgumentParser(
         prog="promptshield dashboard",
-        description="Avvia il server e mostra l'URL della dashboard admin.",
+        description="Start the server and print the admin dashboard URL.",
     )
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=8000)
@@ -507,20 +507,20 @@ def run_cleanup(argv: list[str] | None = None) -> int:
     """Enforce retention policy (delete old analyses / audit events)."""
     parser = argparse.ArgumentParser(
         prog="promptshield cleanup",
-        description="Elimina analisi ed eventi più vecchi di N giorni.",
+        description="Delete analyses and events older than N days.",
     )
     parser.add_argument(
         "--days",
         type=int,
         default=None,
-        help="Giorni di retention (default: PROMPTSHIELD_RETENTION_DAYS o 90).",
+        help="Retention days (default: PROMPTSHIELD_RETENTION_DAYS or 90).",
     )
     args = parser.parse_args(argv)
     from promptshield.persistence.cleanup import enforce_retention_policy
 
     result = enforce_retention_policy(args.days)
     print(
-        f"Cleanup completato: retention={result['retention_days']}d "
+        f"Cleanup completed: retention={result['retention_days']}d "
         f"deleted_analyses={result['deleted_analyses']} "
         f"deleted_events={result['deleted_events']} "
         f"cutoff={result['cutoff']}"
@@ -549,11 +549,11 @@ def main(argv: list[str] | None = None) -> int:
     try:
         prompt = _read_prompt(args.file)
     except OSError as exc:
-        print(f"Errore lettura prompt: {exc}", file=sys.stderr)
+        print(f"Error reading prompt: {exc}", file=sys.stderr)
         return 1
 
     if not prompt.strip():
-        print("Prompt vuoto: nulla da analizzare.", file=sys.stderr)
+        print("Empty prompt: nothing to analyze.", file=sys.stderr)
         return 1
 
     try:
@@ -571,7 +571,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     except Exception as exc:
         logger.exception("Analysis failed")
-        print(f"Errore durante l'analisi: {exc}", file=sys.stderr)
+        print(f"Error during analysis: {exc}", file=sys.stderr)
         return 1
 
     result = outcome.analysis
@@ -611,7 +611,7 @@ def main(argv: list[str] | None = None) -> int:
         _print_sanitization(san)
         if args.yes or policy_auto_allow:
             print(
-                f"{Fore.GREEN}Prompt sanitizzato inviato (simulazione){Style.RESET_ALL}"
+                f"{Fore.GREEN}Sanitized prompt sent (simulation){Style.RESET_ALL}"
             )
             return 0 if interactive else final_exit
         if interactive:
@@ -619,16 +619,16 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if _ask_send_sanitized():
             print(
-                f"{Fore.GREEN}Prompt sanitizzato inviato (simulazione){Style.RESET_ALL}"
+                f"{Fore.GREEN}Sanitized prompt sent (simulation){Style.RESET_ALL}"
             )
             return final_exit
-        print(f"{Fore.YELLOW}Invio annullato.{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}Send cancelled.{Style.RESET_ALL}")
         return final_exit
 
     if args.yes or policy_auto_allow:
         if decision.action is PolicyAction.WARN:
-            print(f"{Fore.YELLOW}Invio consentito con avviso policy.{Style.RESET_ALL}")
-        print(f"{Fore.GREEN}Prompt inviato (simulazione){Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}Send allowed with policy warning.{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}Prompt sent (simulation){Style.RESET_ALL}")
         return 0 if interactive else final_exit
 
     if interactive:
@@ -637,7 +637,7 @@ def main(argv: list[str] | None = None) -> int:
                 san = service.sanitizer.sanitize(prompt, findings_list)
                 _print_sanitization(san)
                 print(
-                    f"{Fore.GREEN}Prompt sanitizzato inviato (simulazione)"
+                    f"{Fore.GREEN}Sanitized prompt sent (simulation)"
                     f"{Style.RESET_ALL}"
                 )
                 return 0
@@ -652,20 +652,20 @@ def main(argv: list[str] | None = None) -> int:
             san = service.sanitizer.sanitize(prompt, findings_list)
             _print_sanitization(san)
             print(
-                f"{Fore.GREEN}Prompt sanitizzato inviato (simulazione){Style.RESET_ALL}"
+                f"{Fore.GREEN}Sanitized prompt sent (simulation){Style.RESET_ALL}"
             )
             return final_exit
         if _ask_send_original():
-            print(f"{Fore.GREEN}Prompt inviato (simulazione){Style.RESET_ALL}")
+            print(f"{Fore.GREEN}Prompt sent (simulation){Style.RESET_ALL}")
             return final_exit
-        print(f"{Fore.YELLOW}Invio annullato.{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}Send cancelled.{Style.RESET_ALL}")
         return final_exit
 
     if _ask_send_original():
-        print(f"{Fore.GREEN}Prompt inviato (simulazione){Style.RESET_ALL}")
+        print(f"{Fore.GREEN}Prompt sent (simulation){Style.RESET_ALL}")
         return final_exit
 
-    print(f"{Fore.YELLOW}Invio annullato.{Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Send cancelled.{Style.RESET_ALL}")
     return final_exit
 
 

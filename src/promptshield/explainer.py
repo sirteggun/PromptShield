@@ -76,22 +76,22 @@ def _collect_risk_factors(
     for finding in findings:
         if finding.category == "secret":
             factors.append(
-                f"Segreto rilevato da {finding.detector_name} "
+                f"Secret detected by {finding.detector_name} "
                 f"({finding.matched_text_preview()})"
             )
         elif finding.category == "pii":
             preview = finding.matched_text_preview()
             token = finding.replacement_token or "<REDACTED>"
-            factors.append(f"Dato personale (PII): {preview or token}")
+            factors.append(f"Personal data (PII): {preview or token}")
         elif finding.category == "context":
             kw = finding.metadata.get("keyword") or finding.matched_text_preview()
-            factors.append(f"Contesto a rischio: '{kw}'")
+            factors.append(f"Risky context: '{kw}'")
         elif finding.category == "keyword":
             kw = finding.metadata.get("keyword") or finding.matched_text_preview()
-            factors.append(f"Parola chiave bloccata: '{kw}'")
+            factors.append(f"Blocked keyword: '{kw}'")
         elif finding.category == "infrastructure":
             factors.append(
-                f"Infrastruttura: {finding.detector_name} "
+                f"Infrastructure: {finding.detector_name} "
                 f"({finding.matched_text_preview()})"
             )
         else:
@@ -102,7 +102,7 @@ def _collect_risk_factors(
 
     top = _primary_label(prompt_labels)
     if top and top != "unknown":
-        factors.append(f"Classificazione contenuto: {top}")
+        factors.append(f"Content classification: {top}")
 
     # Deduplicate preserving order
     seen: set[str] = set()
@@ -185,32 +185,32 @@ def _build_summary(
     parts: list[str] = []
 
     if "secret" in cats:
-        parts.append("Il prompt contiene credenziali o segreti")
+        parts.append("The prompt contains credentials or secrets")
     if "pii" in cats:
-        parts.append("contiene dati personali (PII)")
+        parts.append("contains personal data (PII)")
     if _has_context(findings, "production"):
-        parts.append("menziona l'ambiente di produzione")
+        parts.append("mentions a production environment")
     if _has_context(findings, "financial"):
-        parts.append("si colloca in un contesto finanziario")
+        parts.append("falls into a financial context")
     if "keyword" in cats:
-        parts.append("include parole chiave di policy interna")
+        parts.append("includes internal policy keywords")
 
     if not parts and findings:
         parts.append(
-            f"Il prompt ha generato {len(findings)} finding "
+            f"The prompt produced {len(findings)} finding(s) "
             f"(risk score {risk_score}/100)"
         )
     elif not parts:
-        parts.append("Nessun contenuto sensibile rilevato nel prompt")
+        parts.append("No sensitive content detected in the prompt")
 
     # Classification flavour
     label_hints = {
-        "source_code": "Sembra codice sorgente.",
-        "config_file": "Sembra un file di configurazione.",
-        "log_output": "Sembra un estratto di log.",
-        "database_dump": "Sembra un dump o export di database.",
-        "email_conversation": "Sembra una conversazione email.",
-        "generic_document": "Sembra un documento di testo generico.",
+        "source_code": "Looks like source code.",
+        "config_file": "Looks like a configuration file.",
+        "log_output": "Looks like a log excerpt.",
+        "database_dump": "Looks like a database dump or export.",
+        "email_conversation": "Looks like an email conversation.",
+        "generic_document": "Looks like a generic text document.",
         "unknown": "",
     }
     flavour = label_hints.get(label, "")
@@ -219,14 +219,14 @@ def _build_summary(
 
     if policy_decision.winning_policy is not None:
         parts.append(
-            f"Policy '{policy_decision.winning_policy.id}' → "
+            f"Policy '{policy_decision.winning_policy.id}' -> "
             f"{policy_decision.action.value}"
         )
 
     core = ". ".join(p[0].upper() + p[1:] if p else p for p in parts if p)
     if not core.endswith("."):
         core += "."
-    return f"{core} Azione consigliata: {action}."
+    return f"{core} Recommended action: {action}."
 
 
 def explain_risk(

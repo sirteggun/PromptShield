@@ -29,10 +29,10 @@ TOKEN_LABELS: dict[str, str] = {
     "<GITHUB_TOKEN>": "GitHub Token",
     "<PRIVATE_KEY>": "Private Key",
     "<EMAIL_ADDRESS>": "Email",
-    "<PRIVATE_IP>": "IP Privato",
-    "<INTERNAL_URL>": "URL Interno",
-    "<BLOCKED_KEYWORD>": "Parola bloccata",
-    "<CONTEXT_RISK_WORD>": "Parola di contesto",
+    "<PRIVATE_IP>": "Private IP",
+    "<INTERNAL_URL>": "Internal URL",
+    "<BLOCKED_KEYWORD>": "Blocked keyword",
+    "<CONTEXT_RISK_WORD>": "Context keyword",
 }
 
 
@@ -182,4 +182,4 @@ def label_for_token(token: str, finding: Finding | None = None) -> str:
         return TOKEN_LABELS[token]
     if finding is not None and finding.detector_name:
         return finding.detector_name
-    return token.strip("<>") or "Sostituzione"
+    return token.strip("<>") or "Replacement"

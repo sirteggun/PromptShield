@@ -104,7 +104,7 @@ def test_unknown() -> None:
     assert len(labels) == 1
     assert labels[0].label == "unknown"
     assert labels[0].confidence == 1.0
-    assert "Nessun pattern" in labels[0].evidence[0]
+    assert "No recognized pattern" in labels[0].evidence[0]
 
 
 def test_confidence_saturated() -> None:

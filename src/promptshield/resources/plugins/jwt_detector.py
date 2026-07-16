@@ -39,21 +39,20 @@ class JWTDetector(BaseDetector):
                     start_position=match.start(),
                     end_position=match.end(),
                     severity=Severity.CRITICAL,
-                    message="Possibile token JWT rilevato nel prompt.",
+                    message="Possible JWT detected in the prompt.",
                     weight=self.DEFAULT_WEIGHT,
                     category=self.CATEGORY,
                     explanation=(
-                        "Un JWT (JSON Web Token) spesso contiene identità, "
-                        "autorizzazioni e firm digital. Se inviato a un LLM può "
-                        "essere memorizzato nei log del provider e usato per "
-                        "impersonare utenti o chiamare API protette fino alla "
-                        "scadenza del token."
+                        "A JWT (JSON Web Token) often carries identity, "
+                        "authorization claims, and a digital signature. If sent "
+                        "to an LLM it may be stored in provider logs and used to "
+                        "impersonate users or call protected APIs until expiry."
                     ),
                     remediation=(
-                        "Non incollare token di sessione o di servizio nei prompt. "
-                        "Usa account di test con token monouso, redigi il JWT con "
-                        f"{self.REPLACEMENT_TOKEN}, e revoca/ruota il token se è "
-                        "già stato esposto."
+                        "Do not paste session or service tokens into prompts. "
+                        "Use test accounts with short-lived tokens, redact the JWT "
+                        f"with {self.REPLACEMENT_TOKEN}, and revoke/rotate the "
+                        "token if it was already exposed."
                     ),
                     replacement_token=self.REPLACEMENT_TOKEN,
                     metadata={"pattern": "jwt"},

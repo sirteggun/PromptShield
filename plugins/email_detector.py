@@ -35,19 +35,19 @@ class EmailDetector(BaseDetector):
                     start_position=match.start(),
                     end_position=match.end(),
                     severity=Severity.MEDIUM,  # product WARNING → MEDIUM
-                    message=f"Indirizzo email rilevato: {match.group(0)}",
+                    message=f"Email address detected: {match.group(0)}",
                     weight=self.DEFAULT_WEIGHT,
                     category=self.CATEGORY,
                     explanation=(
-                        "Gli indirizzi email sono dati personali (PII). Inviarli "
-                        "a un LLM può violare policy privacy/GDPR se il provider "
-                        "conserva i prompt, e facilita phishing o targeting."
+                        "Email addresses are personal data (PII). Sending them "
+                        "to an LLM may violate privacy/GDPR policy if the provider "
+                        "retains prompts, and can enable phishing or targeting."
                     ),
                     remediation=(
-                        "Anonimizza i contatti: usa "
-                        f"{self.REPLACEMENT_TOKEN} o un alias di test. "
-                        "Evita elenchi di clienti o colleghi nei prompt verso "
-                        "servizi cloud non coperti da DPA."
+                        "Anonymize contacts: use "
+                        f"{self.REPLACEMENT_TOKEN} or a test alias. "
+                        "Avoid customer or colleague lists in prompts to cloud "
+                        "services not covered by a DPA."
                     ),
                     replacement_token=self.REPLACEMENT_TOKEN,
                     metadata={"pattern": "email"},

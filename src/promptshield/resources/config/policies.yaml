@@ -42,37 +42,37 @@
 policies:
   # --- Hard block: any secret credential pattern ---
   - id: NO_SECRETS
-    description: Blocca qualsiasi invio che contenga segreti (AWS, JWT, chiavi, token).
+    description: Block any send that contains secrets (AWS, JWT, keys, tokens).
     action: block
     priority: 100
     conditions:
       category: secret
-    message: "Trovati segreti nel prompt. Rimuoverli prima di inviare."
+    message: "Secrets found in the prompt. Remove them before sending."
 
   # --- Soft warn: production context ---
   - id: PRODUCTION_WARNING
-    description: Avvisa se il prompt menziona ambienti di produzione.
+    description: Warn when the prompt mentions production environments.
     action: warn
     priority: 50
     conditions:
       context: production
-    message: "Il prompt contiene riferimenti alla produzione. Verificare i dati."
+    message: "The prompt contains production references. Review the data."
 
   # --- Compliance: PII + financial context ---
   - id: PCI_COMPLIANCE
-    description: Blocca prompt con dati PII in contesto finanziario (PCI DSS).
+    description: Block prompts with PII in a financial context (PCI DSS).
     action: block
     priority: 90
     conditions:
       category: pii
       context: financial
-    message: "Dati personali in contesto finanziario. Bloccato per policy PCI DSS."
+    message: "Personal data in a financial context. Blocked by PCI DSS policy."
 
   # --- Internal blocked keywords (payroll, acquisition, …) ---
   - id: INTERNAL_KEYWORDS
-    description: Avvisa quando compaiono parole chiave di policy interna.
+    description: Warn when internal policy keywords appear.
     action: warn
     priority: 40
     conditions:
       category: keyword
-    message: "Rilevate parole chiave interne bloccate. Rivedere il contenuto del prompt."
+    message: "Blocked internal keywords detected. Review the prompt content."

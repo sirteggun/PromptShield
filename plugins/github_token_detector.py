@@ -43,20 +43,20 @@ class GitHubTokenDetector(BaseDetector):
                     start_position=match.start(),
                     end_position=match.end(),
                     severity=Severity.CRITICAL,
-                    message="Possibile token GitHub rilevato nel prompt.",
+                    message="Possible GitHub token detected in the prompt.",
                     weight=self.DEFAULT_WEIGHT,
                     category=self.CATEGORY,
                     explanation=(
-                        "I token GitHub (PAT, OAuth, server-to-server) concedono "
-                        "accesso a repository, organizzazioni e API. Un LLM o i "
-                        "suoi log potrebbero conservare il valore, consentendo "
-                        "clonazioni, push o esfiltrazione del codice."
+                        "GitHub tokens (PAT, OAuth, server-to-server) grant "
+                        "access to repositories, organizations, and APIs. An LLM "
+                        "or its logs may retain the value, enabling clones, "
+                        "pushes, or code exfiltration."
                     ),
                     remediation=(
-                        "Revoca immediatamente il token su GitHub → Settings → "
-                        "Developer settings. Non condividere PAT nei prompt; usa "
-                        f"{self.REPLACEMENT_TOKEN} o secret store / CI secrets. "
-                        "Preferisci fine-grained PAT con scope minimi."
+                        "Revoke the token immediately in GitHub -> Settings -> "
+                        "Developer settings. Do not share PATs in prompts; use "
+                        f"{self.REPLACEMENT_TOKEN} or a secret store / CI secrets. "
+                        "Prefer fine-grained PATs with minimal scopes."
                     ),
                     replacement_token=self.REPLACEMENT_TOKEN,
                     metadata={

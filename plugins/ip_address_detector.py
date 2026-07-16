@@ -50,19 +50,19 @@ class IPAddressDetector(BaseDetector):
                     start_position=match.start(),
                     end_position=match.end(),
                     severity=Severity.INFO,
-                    message=f"Indirizzo IP privato/loopback rilevato: {ip}",
+                    message=f"Private/loopback IP address detected: {ip}",
                     weight=self.DEFAULT_WEIGHT,
                     category=self.CATEGORY,
                     explanation=(
-                        "Gli IP privati e di loopback rivelano topologia di rete "
-                        "interna. In un prompt LLM possono aiutare un attaccante "
-                        "a mappare segmenti non pubblici o a preparare pivot laterali."
+                        "Private and loopback IPs reveal internal network "
+                        "topology. In an LLM prompt they can help an attacker "
+                        "map non-public segments or plan lateral movement."
                     ),
                     remediation=(
-                        "Sostituisci gli indirizzi con "
-                        f"{self.REPLACEMENT_TOKEN} o descrizioni generiche "
-                        "(es. 'host interno A'). Non condividere mappe di rete "
-                        "complete con servizi esterni."
+                        "Replace addresses with "
+                        f"{self.REPLACEMENT_TOKEN} or generic descriptions "
+                        "(e.g. 'internal host A'). Do not share full network maps "
+                        "with external services."
                     ),
                     replacement_token=self.REPLACEMENT_TOKEN,
                     metadata={"pattern": "private_ip"},

@@ -45,21 +45,20 @@ class SecretDetector(BaseDetector):
                     end_position=match.end(),
                     severity=Severity.HIGH,
                     message=(
-                        "Possibile AWS Access Key ID rilevata. "
-                        "Non includere credenziali cloud nei prompt inviati a LLM."
+                        "Possible AWS Access Key ID detected. "
+                        "Do not include cloud credentials in prompts sent to LLMs."
                     ),
                     weight=self.DEFAULT_WEIGHT,
                     category=self.CATEGORY,
                     explanation=(
-                        "AWS Access Key ID può essere usata per accedere alle "
-                        "risorse cloud. Se inviata a un LLM, potrebbe essere "
-                        "registrata nei log del provider e potenzialmente esposta."
+                        "An AWS Access Key ID can be used to access cloud "
+                        "resources. If sent to an LLM, it may be retained in "
+                        "provider logs and potentially exposed."
                     ),
                     remediation=(
-                        "Sostituisci la chiave con una variabile d'ambiente o un "
-                        "placeholder prima di condividere il codice. Non committare "
-                        "mai chiavi in chiaro. Ruota immediatamente le credenziali "
-                        "se sono state esposte."
+                        "Replace the key with an environment variable or "
+                        "placeholder before sharing code. Never commit plaintext "
+                        "keys. Rotate credentials immediately if they were exposed."
                     ),
                     replacement_token=self.REPLACEMENT_TOKEN,
                     metadata={"pattern": "aws_access_key_id"},

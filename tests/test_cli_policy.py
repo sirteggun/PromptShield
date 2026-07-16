@@ -49,7 +49,7 @@ def test_production_warning_warns_not_block_on_green() -> None:
                 priority: 50
                 conditions:
                   context: production
-                message: "Il prompt contiene riferimenti alla produzione."
+                message: "The prompt contains production references."
             """
         ).strip()
         + "\n",
@@ -133,5 +133,5 @@ def test_empty_policies_allow_and_json_section_present() -> None:
 def test_human_cli_block_message_on_secret() -> None:
     proc = _run("-y", "--no-color", prompt="AKIA1234567890ABCDEF")
     out = proc.stdout + proc.stderr
-    assert "BLOCCATO" in out or "block" in out.lower() or "NO_SECRETS" in out
+    assert "BLOCKED" in out or "block" in out.lower() or "NO_SECRETS" in out
     assert proc.returncode == 2

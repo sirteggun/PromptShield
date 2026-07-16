@@ -119,7 +119,7 @@ def test_no_findings() -> None:
     decision = PolicyDecision(action=PolicyAction.ALLOW)
     exp = explain_risk([], 0, decision, [PromptLabel("unknown", 1.0, ["none"])])
     assert exp.recommended_action == "ALLOW"
-    assert "sensibile" in exp.summary.lower() or "Nessun" in exp.summary
+    assert "sensitive" in exp.summary.lower() or "No sensitive" in exp.summary
 
 
 def test_secret_production_config_narrative() -> None:
@@ -155,4 +155,4 @@ def test_secret_production_config_narrative() -> None:
     exp = explain_risk(findings, 60, decision, labels)
     assert exp.recommended_action == "BLOCK"
     assert exp.risk_factors
-    assert any("production" in f.lower() or "Segreto" in f for f in exp.risk_factors)
+    assert any("production" in f.lower() or "Secret" in f for f in exp.risk_factors)

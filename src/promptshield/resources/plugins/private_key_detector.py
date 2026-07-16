@@ -64,21 +64,21 @@ class PrivateKeyDetector(BaseDetector):
                     start_position=start,
                     end_position=end,
                     severity=Severity.CRITICAL,
-                    message=(f"Blocco di chiave privata rilevato (pos. {start})."),
+                    message=(f"Private key block detected (pos. {start})."),
                     weight=self.DEFAULT_WEIGHT,
                     category=self.CATEGORY,
                     explanation=(
-                        "Una chiave privata consente di firmare o decifrare dati "
-                        "e autenticarsi a server/servizi. Se inclusa in un prompt "
-                        "LLM può finire in log, training cache o ticket di supporto, "
-                        "compromettendo l'intera infrastruttura protetta da quella chiave."
+                        "A private key can sign or decrypt data and authenticate "
+                        "to servers and services. If included in an LLM prompt it "
+                        "may end up in logs, training caches, or support tickets, "
+                        "compromising the infrastructure protected by that key."
                     ),
                     remediation=(
-                        "Rimuovi immediatamente il blocco PEM dal prompt. "
-                        f"Sostituiscilo con {self.REPLACEMENT_TOKEN}. "
-                        "Se la chiave è stata esposta, genera una nuova coppia, "
-                        "distribuisci la pubblica e revoca la vecchia. Non "
-                        "condividere mai chiavi private con strumenti AI."
+                        "Remove the PEM block from the prompt immediately. "
+                        f"Replace it with {self.REPLACEMENT_TOKEN}. "
+                        "If the key was exposed, generate a new key pair, "
+                        "distribute the public key, and revoke the old one. Never "
+                        "share private keys with AI tools."
                     ),
                     replacement_token=self.REPLACEMENT_TOKEN,
                     metadata={

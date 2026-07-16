@@ -56,20 +56,20 @@ class InternalURLDetector(BaseDetector):
                     start_position=match.start(),
                     end_position=end,
                     severity=Severity.MEDIUM,  # product WARNING → MEDIUM
-                    message=f"URL interno/non-prod rilevato: {url_clean}",
+                    message=f"Internal/non-prod URL detected: {url_clean}",
                     weight=self.DEFAULT_WEIGHT,
                     category=self.CATEGORY,
                     explanation=(
-                        "URL di ambienti internal/admin/staging o host .local "
-                        "espongono endpoint non pubblici. Condividerli con un LLM "
-                        "può rivelare naming convention, porte e superfici di attacco "
-                        "della rete aziendale."
+                        "URLs for internal/admin/staging environments or .local "
+                        "hosts expose non-public endpoints. Sharing them with an LLM "
+                        "can reveal naming conventions, ports, and attack surface "
+                        "of the corporate network."
                     ),
                     remediation=(
-                        "Sostituisci l'URL con "
-                        f"{self.REPLACEMENT_TOKEN} o un hostname fittizio. "
-                        "Descrivi il problema senza link a console admin o "
-                        "ambienti non pubblici."
+                        "Replace the URL with "
+                        f"{self.REPLACEMENT_TOKEN} or a fictional hostname. "
+                        "Describe the issue without linking to admin consoles or "
+                        "non-public environments."
                     ),
                     replacement_token=self.REPLACEMENT_TOKEN,
                     metadata={"pattern": "internal_url"},
