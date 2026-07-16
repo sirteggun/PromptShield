@@ -42,7 +42,7 @@
 policies:
   # --- Hard block: any secret credential pattern ---
   - id: NO_SECRETS
-    description: Block any send that contains secrets (AWS, JWT, keys, tokens).
+    description: Block any prompt containing secrets (AWS, JWT, keys, tokens).
     action: block
     priority: 100
     conditions:
